@@ -1,13 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { Contact } from '../contact.model';
-import { ContactService } from '../contact.service';
-import { Router, ActivatedRoute, Params } from '@angular/router';
-import { NgForm } from '@angular/forms';
+import { Component, OnInit } from "@angular/core";
+import { Contact } from "../contact.model";
+import { ContactService } from "../contact.service";
+import { Router, ActivatedRoute, Params } from "@angular/router";
+import { NgForm } from "@angular/forms";
 
 @Component({
-  selector: 'cms-contactedit',
-  templateUrl: './contactedit.component.html',
-  styleUrls: ['./contactedit.component.css']
+  selector: "cms-contactedit",
+  templateUrl: "./contactedit.component.html",
+  styleUrls: ["./contactedit.component.css"]
 })
 export class ContacteditComponent implements OnInit {
   contact: Contact;
@@ -18,56 +18,64 @@ export class ContacteditComponent implements OnInit {
   invalidGroupContact = false;
   id: string;
 
-  constructor(private contactService: ContactService,
-              private router: Router,
-              private route: ActivatedRoute) { }
+  constructor(
+    private contactService: ContactService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
-    this.route.params
-      .subscribe(
-        (params: Params) => {
-          // tslint:disable-next-line: no-string-literal
-          this.id = params['id'];
-          if ( this.id === null || this.id === undefined) {
-            this.editMode = false;
-            return;
-          }
+    this.route.params.subscribe((params: Params) => {
+      // tslint:disable-next-line: no-string-literal
+      this.id = params["id"];
+      if (this.id === null || this.id === undefined) {
+        this.editMode = false;
+        return;
+      }
 
-          this.originalContact = this.contactService.getContact(this.id);
-          if (this.originalContact === null || this.originalContact === undefined) {
-            return;
-          }
+      this.originalContact = this.contactService.getContact(this.id);
+      if (this.originalContact === null || this.originalContact === undefined) {
+        return;
+      }
 
-          this.editMode = true;
-          this.contact = JSON.parse(JSON.stringify(this.originalContact));
+      this.editMode = true;
+      this.contact = JSON.parse(JSON.stringify(this.originalContact));
 
-          if (this.originalContact.group && this.originalContact.group.length > 0) {
-            this.groupContacts = JSON.parse(JSON.stringify(this.originalContact.group));
-          }
-        }
-      );
+      if (this.originalContact.group && this.originalContact.group.length > 0) {
+        this.groupContacts = JSON.parse(
+          JSON.stringify(this.originalContact.group)
+        );
+      }
+    });
   }
 
   onSubmit(form: NgForm) {
     const value = form.value;
-    const newContact = new Contact(value.id, value.name, value.email, value.phone, value.imageUrl, this.groupContacts);
+    const newContact = new Contact(
+      value.id,
+      value.name,
+      value.email,
+      value.phone,
+      value.imageUrl,
+      this.groupContacts
+    );
     if (this.editMode === true) {
       this.contactService.updateContact(this.originalContact, newContact);
     } else {
       this.contactService.addContact(newContact);
     }
-    this.router.navigate(['/contacts']);
+    this.router.navigate(["/contacts"]);
   }
 
   onCancel() {
-    this.router.navigate(['/contacts']);
+    this.router.navigate(["/contacts"]);
   }
 
   isInvalidContact(newContact: Contact) {
     if (!newContact) {
       return true;
     }
-    if (newContact.id === this.contact.id) {
+    if (this.contact && newContact.id === this.contact.id) {
       return true;
     }
     // tslint:disable-next-line: prefer-for-of
@@ -96,5 +104,4 @@ export class ContacteditComponent implements OnInit {
     this.groupContacts.splice(idx, 1);
     this.invalidGroupContact = false;
   }
-
 }

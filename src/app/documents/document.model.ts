@@ -3,14 +3,14 @@ export class Document {
   public name: string;
   public description: string;
   public url: string;
-  public children: string;
+  public children: Document[];
 
   constructor(
     id: string,
     name: string,
     desc: string,
     url: string,
-    children: string
+    children: Document[]
   ) {
     this.id = id;
     this.name = name;

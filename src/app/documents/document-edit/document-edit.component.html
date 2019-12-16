@@ -11,7 +11,7 @@
             size="120"
             max="120"
             name="name"
-            ngModel
+            [ngModel]="document?.name"
             #name="ngModel"
             required
           />
@@ -31,17 +31,17 @@
         </div>
 
         <div class="col-sm-12 form-group">
-          <label for="documentUrl">Document URL</label>
+          <label for="url">Document URL</label>
           <input
             type="text"
-            id="documentUrl"
+            id="url"
             class="form-control"
             size="150"
             max="255"
-            name="documentUrl"
+            name="url"
             required
-            ngModel
-            #documentUrl="ngModel"
+            [ngModel]="document?.url"
+            #url="ngModel"
           />
         </div>
       </div>

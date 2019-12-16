@@ -1,38 +1,75 @@
-import { Injectable, EventEmitter } from '@angular/core';
-import { Message } from './message.model';
+import { Injectable, EventEmitter, OnInit } from '@angular/core';
 import { MOCKMESSAGES } from './MOCKMESSAGES';
+import { Message } from './message.model';
+import { Subject } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class MessagesService {
-  messages: Message[];
-  messageChangeEvent = new EventEmitter<Message[]>();
+    messageChangeEvent = new Subject<Message[]>();
+    messages: Message[] = [];
+    maxMessageId: number;
 
-  addMessage(message: Message) {
-    this.messages.push(message);
-    this.messageChangeEvent.emit(this.messages.slice());
-  }
-
-  constructor() {
-    this.messages = MOCKMESSAGES;
-  }
-
-  // functions are responsible
-  // getting the list of messages and a single message respectively.
-  getMessage(id: string): Message {
-    for (const message of this.messages) {
-      // tslint:disable-next-line: curly
-      if (message.id === id)
-        return message;
+    constructor(private http: HttpClient) {
+        // this.messages = MOCKMESSAGES;
+        this.maxMessageId = this.getMaxId();
     }
-    return null;
-  }
 
-  getMessages(): Message[] {
-    return this.messages.slice();
-  }
+    storeMessages() {
+        this.messages = JSON.parse(JSON.stringify(this.messages));
+        const header = new HttpHeaders({'Content-Type': 'application/json'});
+        return this.http.put('https://cmss-52535.firebaseio.com/messages.json', this.messages, { headers: header})
+          .subscribe(
+            (messages: Message[]) => {
+              this.messageChangeEvent.next(this.messages.slice());
+            }
+          );
+      }
 
+      getMessages() {
+        this.http.get('https://cmss-52535.firebaseio.com/messages.json')
+          .subscribe(
+            (messages: Message[]) => {
+              this.messages = messages;
+              // tslint:disable-next-line: no-string-literal
+              this.messages.sort((a, b) => (a['name'] < b['name']) ? 1 : (a['name'] > b['name']) ? -1 : 0);
+              this.messageChangeEvent.next(this.messages.slice());
+            }, (error: any) => {
+              console.log('something bad happened...');
+            }
+          );
+      }
 
+      getMessage(id: string) {
+        for (const message of this.messages) {
+          if (message.id === id) {
+            return message;
+          }
+        }
+        return null;
+      }
+
+      addMessage(newMessage: Message) {
+        if (newMessage === null) {
+          return;
+        }
+
+        this.maxMessageId++;
+        newMessage.id = String(this.maxMessageId);
+        this.messages.push(newMessage);
+        // this.messageChangeEvent.emit(this.messages.slice());
+        this.storeMessages();
+      }
+
+      getMaxId(): number {
+        let maxId = 0;
+        for (const message of this.messages) {
+          const currentId = +message.id;
+          if (currentId > maxId) {
+            maxId = currentId;
+          }
+        }
+        return maxId;
+      }
 }

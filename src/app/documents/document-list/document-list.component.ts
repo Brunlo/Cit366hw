@@ -1,13 +1,19 @@
-import { Component, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
-import { Document } from '../document.model';
-import { DocumentsService } from '../documents.service';
-import { Subscription } from 'rxjs';
-import { Router, ActivatedRoute } from '@angular/router';
+import {
+  Component,
+  OnInit,
+  Output,
+  EventEmitter,
+  OnDestroy
+} from "@angular/core";
+import { Document } from "../document.model";
+import { DocumentsService } from "../documents.service";
+import { Subscription } from "rxjs";
+import { Router, ActivatedRoute } from "@angular/router";
 
 @Component({
-  selector: 'cms-document-list',
-  templateUrl: './document-list.component.html',
-  styleUrls: ['./document-list.component.css']
+  selector: "cms-document-list",
+  templateUrl: "./document-list.component.html",
+  styleUrls: ["./document-list.component.css"]
 })
 export class DocumentListComponent implements OnInit, OnDestroy {
   documents: Document[];
@@ -16,25 +22,26 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   constructor(
     private documentService: DocumentsService,
     private router: Router,
-    private route: ActivatedRoute) {
+    private route: ActivatedRoute
+  ) {
     this.documentService.getDocuments();
   }
 
   ngOnInit() {
-    this.documents = this.documentService.getDocuments();
     this.subscription = this.documentService.documentListChangedEvent.subscribe(
       (document: Document[]) => {
         this.documents = document;
       }
     );
+
+    this.documentService.getDocuments();
   }
 
   onNewDocument() {
-    this.router.navigate(['new'], { relativeTo: this.route });
+    this.router.navigate(["new"], { relativeTo: this.route });
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
-
 }
